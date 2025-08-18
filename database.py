@@ -1,8 +1,7 @@
-import asyncpg
-import asyncio
 from datetime import datetime, timedelta
-from config import DATABASE_URL
+import asyncpg
 import logging
+from config import DATABASE_URL
 
 class Database:
     def __init__(self):
@@ -172,6 +171,76 @@ class Database:
             logging.error(f"Error getting stats for {user_id}: {e}")
             return None
     
+    async def get_bot_stats(self):
+        try:
+            async with self.pool.acquire() as conn:
+                return await conn.fetchrow('''
+                    SELECT 
+                        COUNT(DISTINCT u.user_id) as total_users,
+                        COUNT(b.id) as total_businesses,
+                        COUNT(t.id) as total_tasks,
+                        COUNT(CASE WHEN u.subscription_end > CURRENT_TIMESTAMP THEN 1 END) as active_subscribers
+                    FROM users u
+                    LEFT JOIN businesses b ON u.user_id = b.user_id
+                    LEFT JOIN tasks t ON u.user_id = t.user_id
+                ''')
+        except Exception as e:
+            logging.error(f"Error getting bot stats: {e}")
+            return {'total_users': 0, 'total_businesses': 0, 'total_tasks': 0, 'active_subscribers': 0}
+
+    async def get_users_list(self, page, per_page):
+        try:
+            offset = (page - 1) * per_page
+            async with self.pool.acquire() as conn:
+                return await conn.fetch('''
+                    SELECT 
+                        u.user_id,
+                        u.username,
+                        u.subscription_end,
+                        u.subscription_type,
+                        COUNT(b.id) as total_businesses
+                    FROM users u
+                    LEFT JOIN businesses b ON u.user_id = b.user_id
+                    GROUP BY u.user_id, u.username, u.subscription_end, u.subscription_type
+                    ORDER BY u.user_id
+                    LIMIT $1 OFFSET $2
+                ''', per_page, offset)
+        except Exception as e:
+            logging.error(f"Error getting users list: {e}")
+            return []
+
+    async def ban_user(self, user_id):
+        try:
+            async with self.pool.acquire() as conn:
+                await conn.execute('''
+                    UPDATE users SET is_active = FALSE WHERE user_id = $1
+                ''', user_id)
+        except Exception as e:
+            logging.error(f"Error banning user {user_id}: {e}")
+
+    async def cancel_subscription(self, user_id):
+        try:
+            async with self.pool.acquire() as conn:
+                await conn.execute('''
+                    UPDATE users SET subscription_end = NULL, subscription_type = NULL
+                    WHERE user_id = $1
+                ''', user_id)
+        except Exception as e:
+            logging.error(f"Error canceling subscription for {user_id}: {e}")
+
+    async def get_active_subscriptions(self):
+        try:
+            async with self.pool.acquire() as conn:
+                return await conn.fetch('''
+                    SELECT user_id, username, subscription_type, subscription_end
+                    FROM users
+                    WHERE subscription_end > CURRENT_TIMESTAMP
+                    ORDER BY subscription_end DESC
+                ''')
+        except Exception as e:
+            logging.error(f"Error getting active subscriptions: {e}")
+            return []
+    
     async def close(self):
         """Gracefully close database connections"""
         if self.pool:
@@ -182,4 +251,3 @@ class Database:
                 logging.error(f"Error closing database: {e}")
 
 db = Database()
-
