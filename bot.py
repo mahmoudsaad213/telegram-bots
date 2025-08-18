@@ -20,13 +20,13 @@ def get_subscription_keyboard():
     markup.add(InlineKeyboardButton("Monthly Subscription", callback_data="sub_monthly"))
     return markup
 
-def get_main_menu():
+def get_main_menu(user_id):  # أضفنا user_id كمعامل
     markup = ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add(KeyboardButton("📝 Add Combo"))
     markup.add(KeyboardButton("🚀 Create Businesses"))
     markup.add(KeyboardButton("📊 My Businesses"))
     markup.add(KeyboardButton("🔍 Check Subscription"))
-    if is_admin(ADMIN_ID):
+    if is_admin(user_id):  # استخدمنا user_id بدل ADMIN_ID
         markup.add(KeyboardButton("🛠 Admin Panel"))
     return markup
 
