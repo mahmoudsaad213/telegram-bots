@@ -25,22 +25,22 @@ class FBBusinessBot:
         await db.add_user(user_id, username, first_name)
         
         keyboard = [
-            [InlineKeyboardButton("🚀 Start Creating", callback_data="create_business")],
-            [InlineKeyboardButton("📊 My Stats", callback_data="my_stats")],
-            [InlineKeyboardButton("💎 Subscribe", callback_data="subscribe")]
+            [InlineKeyboardButton("🚀 ابدأ الإنشاء", callback_data="create_business")],
+            [InlineKeyboardButton("📊 إحصائياتي", callback_data="my_stats")],
+            [InlineKeyboardButton("💎 اشتراك", callback_data="subscribe")]
         ]
         
         if user_id == ADMIN_ID:
-            keyboard.append([InlineKeyboardButton("👑 Admin Panel", callback_data="admin_panel")])
+            keyboard.append([InlineKeyboardButton("👑 لوحة الأدمن", callback_data="admin_panel")])
         
         reply_markup = InlineKeyboardMarkup(keyboard)
         
         await update.message.reply_text(
-            "🎉 *Welcome to Facebook Business Creator Bot!*\n\n"
-            "✨ Create unlimited Facebook business accounts\n"
-            "📧 Auto TempMail integration\n"
-            "🔗 Get invitation links instantly\n\n"
-            "Choose an option below:",
+            "🎉 *مرحبًا بك في بوت إنشاء الأعمال!* 🎉\n\n"
+            "✨ إنشاء أعمال فيسبوك غير محدودة\n"
+            "📧 تكامل تلقائي مع TempMail\n"
+            "🔗 روابط دعوة فورية\n\n"
+            "اختر خيارًا:",
             parse_mode='Markdown',
             reply_markup=reply_markup
         )
@@ -55,20 +55,20 @@ class FBBusinessBot:
         if data == "create_business":
             has_subscription = await db.check_subscription(user_id)
             if not has_subscription and user_id != ADMIN_ID:
-                keyboard = [[InlineKeyboardButton("💎 Subscribe Now", callback_data="subscribe")]]
+                keyboard = [[InlineKeyboardButton("💎 اشترك الآن", callback_data="subscribe")]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 await query.edit_message_text(
-                    "❌ *Subscription Required*\n\n"
-                    "You need an active subscription to use this service.",
+                    "❌ *الاشتراك مطلوب*\n\n"
+                    "تحتاج إلى اشتراك نشط لاستخدام هذه الخدمة.",
                     parse_mode='Markdown',
                     reply_markup=reply_markup
                 )
                 return
             
             await query.edit_message_text(
-                "📝 *Send Your Cookies*\n\n"
-                "Send your Facebook cookies (one per line for multiple accounts):\n\n"
-                "Format: `cookie1=value1; cookie2=value2; ...`",
+                "📝 *أرسل الكوكيز*\n\n"
+                "أرسل كوكيز فيسبوك (واحد لكل سطر للحسابات المتعددة):\n\n"
+                "الصيغة: `cookie1=value1; cookie2=value2; ...`",
                 parse_mode='Markdown'
             )
             context.user_data['waiting_cookies'] = True
@@ -76,30 +76,33 @@ class FBBusinessBot:
         elif data == "my_stats":
             stats = await db.get_user_stats(user_id)
             if stats:
-                sub_text = "❌ No active subscription"
+                sub_text = "❌ لا يوجد اشتراك نشط"
                 if stats['subscription_end']:
-                    sub_text = f"✅ {stats['subscription_type']} - Until {stats['subscription_end'].strftime('%Y-%m-%d')}"
+                    sub_text = f"✅ {stats['subscription_type']} - حتى {stats['subscription_end'].strftime('%Y-%m-%d')}"
                 
                 await query.edit_message_text(
-                    f"📊 *Your Statistics*\n\n"
-                    f"🏢 Total Businesses: {stats['total_businesses'] or 0}\n"
-                    f"📋 Total Tasks: {stats['total_tasks'] or 0}\n"
-                    f"💎 Subscription: {sub_text}",
-                    parse_mode='Markdown'
+                    f"📊 *إحصائياتك* 📊\n\n"
+                    f"🏢 إجمالي الأعمال: {stats['total_businesses'] or 0}\n"
+                    f"📋 إجمالي المهام: {stats['total_tasks'] or 0}\n"
+                    f"💎 الاشتراك: {sub_text}",
+                    parse_mode='Markdown',
+                    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 رجوع", callback_data="back_to_start")]])
                 )
         
         elif data == "subscribe":
             keyboard = [
-                [InlineKeyboardButton("1 Day - $1", callback_data="buy_daily")],
-                [InlineKeyboardButton("1 Week - $5", callback_data="buy_weekly")],
-                [InlineKeyboardButton("1 Month - $15", callback_data="buy_monthly")]
+                [InlineKeyboardButton("💸 يومي - $1", callback_data="buy_daily")],
+                [InlineKeyboardButton("💰 أسبوعي - $5", callback_data="buy_weekly")],
+                [InlineKeyboardButton("💎 شهري - $15", callback_data="buy_monthly")],
+                [InlineKeyboardButton("🔙 رجوع", callback_data="back_to_start")]
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await query.edit_message_text(
-                "💎 *Choose Subscription Plan*\n\n"
-                "🔸 Daily: Access for 24 hours\n"
-                "🔸 Weekly: Access for 7 days\n"
-                "🔸 Monthly: Access for 30 days",
+                "💎 *اختر خطة الاشتراك* 💎\n\n"
+                "🔸 يومي: وصول لمدة 24 ساعة\n"
+                "🔸 أسبوعي: وصول لمدة 7 أيام + دعم مميز\n"
+                "🔸 شهري: وصول لمدة 30 يوم + تحليلات متقدمة\n\n"
+                "اضغط على الزر للاشتراك مباشرة:",
                 parse_mode='Markdown',
                 reply_markup=reply_markup
             )
@@ -110,16 +113,53 @@ class FBBusinessBot:
             
             await context.bot.send_invoice(
                 chat_id=query.message.chat_id,
-                title=f"{plan_type.title()} Subscription",
-                description=f"Facebook Business Creator - {plan_type} access",
+                title=f"اشتراك {plan_type.title()}",
+                description=f"وصول لـ {plan_type} لخدمة إنشاء الأعمال على فيسبوك",
                 payload=f"subscription_{plan_type}_{user_id}",
                 provider_token="",  # Telegram Stars
                 currency="XTR",
-                prices=[LabeledPrice("Subscription", price)]
+                prices=[LabeledPrice("اشتراك", price)],
+                photo_url="https://example.com/subscription_image.jpg",
+                photo_width=512,
+                photo_height=512
             )
         
         elif data == "admin_panel" and user_id == ADMIN_ID:
             await self.admin.show_admin_panel(query)
+        
+        elif data == "admin_stats":
+            await self.admin.show_bot_stats(query)
+        
+        elif data.startswith("admin_users"):
+            page = int(data.split("_")[-1]) if "_" in data else 1
+            await self.admin.show_user_management(query, page)
+        
+        elif data.startswith("ban_user_"):
+            target_user_id = int(data.split("_")[-1])
+            await self.admin.ban_user(query, target_user_id)
+        
+        elif data.startswith("cancel_sub_"):
+            target_user_id = int(data.split("_")[-1])
+            await self.admin.cancel_subscription(query, target_user_id)
+        
+        elif data == "admin_subs":
+            await self.admin.show_subscriptions(query)
+        
+        elif data == "back_to_start":
+            keyboard = [
+                [InlineKeyboardButton("🚀 ابدأ الإنشاء", callback_data="create_business")],
+                [InlineKeyboardButton("📊 إحصائياتي", callback_data="my_stats")],
+                [InlineKeyboardButton("💎 اشتراك", callback_data="subscribe")]
+            ]
+            if user_id == ADMIN_ID:
+                keyboard.append([InlineKeyboardButton("👑 لوحة الأدمن", callback_data="admin_panel")])
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await query.edit_message_text(
+                "🎉 *مرحبًا بك في بوت إنشاء الأعمال!* 🎉\n\n"
+                "اختر خيارًا:",
+                parse_mode='Markdown',
+                reply_markup=reply_markup
+            )
     
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if context.user_data.get('waiting_cookies'):
@@ -130,23 +170,20 @@ class FBBusinessBot:
             has_subscription = await db.check_subscription(user_id)
             
             if not has_subscription and user_id != ADMIN_ID:
-                await update.message.reply_text("❌ Subscription required!")
+                await update.message.reply_text("❌ الاشتراك مطلوب!")
                 return
             
-            # Process cookies
             cookies_list = [c.strip() for c in cookies_text.split('\n') if c.strip()]
             
             await update.message.reply_text(
-                f"🔄 *Processing Started*\n\n"
-                f"📝 Total Accounts: {len(cookies_list)}\n"
-                f"⏳ Please wait...",
+                f"🔄 *بدأت المعالجة* 🔄\n\n"
+                f"📝 إجمالي الحسابات: {len(cookies_list)}\n"
+                f"⏳ يرجى الانتظار...",
                 parse_mode='Markdown'
             )
             
-            # Create task
             task_id = await db.create_task(user_id, cookies_text, len(cookies_list))
             
-            # Process in background
             asyncio.create_task(self.process_cookies(user_id, cookies_list, task_id))
     
     async def process_cookies(self, user_id, cookies_list, task_id):
@@ -171,18 +208,16 @@ class FBBusinessBot:
             except Exception as e:
                 logging.error(f"Error processing cookies {i}: {e}")
             
-            # Small delay between requests
             await asyncio.sleep(random.randint(3, 8))
         
-        # Send final results
         if successful_businesses:
-            message = f"🎉 *Task Completed Successfully!*\n\n"
-            message += f"✅ Created: {len(successful_businesses)} businesses\n\n"
+            message = f"🎉 *اكتملت المهمة بنجاح!* 🎉\n\n"
+            message += f"✅ تم إنشاء: {len(successful_businesses)} أعمال\n\n"
             
             for i, business in enumerate(successful_businesses, 1):
-                message += f"*Business #{i}*\n"
-                message += f"🆔 ID: `{business['business_id']}`\n"
-                message += f"🔗 [Invitation Link]({business['invitation_link']})\n\n"
+                message += f"*العمل #{i}*\n"
+                message += f"🆔 المعرف: `{business['business_id']}`\n"
+                message += f"🔗 [رابط الدعوة]({business['invitation_link']})\n\n"
             
             try:
                 await self.application.bot.send_message(
@@ -192,10 +227,9 @@ class FBBusinessBot:
                     disable_web_page_preview=True
                 )
             except:
-                # Fallback if message is too long
                 await self.application.bot.send_message(
                     chat_id=user_id,
-                    text=f"🎉 Task completed! Created {len(successful_businesses)} businesses. Check your stats for details.",
+                    text=f"🎉 اكتملت المهمة! تم إنشاء {len(successful_businesses)} أعمال. تحقق من إحصائياتك للتفاصيل.",
                 )
         
         await db.update_task(task_id, status="completed")
@@ -207,28 +241,25 @@ class FBBusinessBot:
     async def successful_payment_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         payload = update.message.successful_payment.invoice_payload
         user_id = update.effective_user.id
-        
-        # Extract subscription type from payload
-        plan_type = payload.split('_')[1]  # subscription_daily_12345 -> daily
+        plan_type = payload.split('_')[1]
         
         await db.add_subscription(user_id, plan_type)
         
         await update.message.reply_text(
-            f"✅ *Subscription Activated!*\n\n"
-            f"💎 Plan: {plan_type.title()}\n"
-            f"🎉 You can now create unlimited Facebook businesses!",
-            parse_mode='Markdown'
+            f"🎉 *تم تفعيل الاشتراك!* 🎉\n\n"
+            f"💎 الخطة: {plan_type.title()}\n"
+            f"🚀 يمكنك الآن إنشاء أعمال فيسبوك غير محدودة!",
+            parse_mode='Markdown',
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🚀 ابدأ الآن", callback_data="create_business")]])
         )
     
     def run(self):
-        """Start the bot with proper async handling"""
         if self.is_running:
             return
             
         self.is_running = True
         self.application = Application.builder().token(BOT_TOKEN).build()
         
-        # Handlers
         self.application.add_handler(CommandHandler("start", self.start))
         self.application.add_handler(CallbackQueryHandler(self.button_callback))
         self.application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))
@@ -237,7 +268,6 @@ class FBBusinessBot:
         
         logging.info("🤖 Bot started successfully!")
         
-        # Run with proper error handling
         try:
             self.application.run_polling(
                 allowed_updates=Update.ALL_TYPES,
@@ -250,11 +280,9 @@ class FBBusinessBot:
             self.shutdown()
     
     def shutdown(self):
-        """Gracefully shutdown the bot"""
         if self.application and self.is_running:
             logging.info("🛑 Shutting down bot...")
             try:
-                # Stop the application gracefully
                 if hasattr(self.application, 'stop'):
                     self.application.stop()
                 if hasattr(self.application, 'shutdown'):
