@@ -7,7 +7,7 @@ BOT_TOKEN = os.getenv('BOT_TOKEN', '8264460763:AAGaGR7IaKeUUQqaw2QD1_3dpX3rAoVTh
 ADMIN_ID = 5895491379
 
 # Marketer Username (غيّر دا لو عايز يوزر مسوق مختلف)
-MARKETER_USERNAME = '@YourMarketerUsername'  # ضع يوزر المسوق الحقيقي هنا
+MARKETER_USERNAME = '@Bangladesh3456'  # ضع يوزر المسوق الحقيقي هنا
 
 # Database Configuration for PostgreSQL (using Railway environment variables)
 DB_HOST = os.getenv('PGHOST', 'localhost')
