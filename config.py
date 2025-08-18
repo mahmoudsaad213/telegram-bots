@@ -4,7 +4,7 @@ import os
 BOT_TOKEN = os.getenv('BOT_TOKEN', '8264460763:AAGaGR7IaKeUUQqaw2QD1_3dpX3rAoVTheI')
 
 # Admin Telegram ID
-ADMIN_ID = 5607097913
+ADMIN_ID = 5895491379
 
 # Marketer Username (غيّر دا لو عايز يوزر مسوق مختلف)
 MARKETER_USERNAME = '@YourMarketerUsername'  # ضع يوزر المسوق الحقيقي هنا
