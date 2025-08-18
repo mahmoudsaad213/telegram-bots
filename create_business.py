@@ -1,4 +1,4 @@
-# create_business.py - Updated and improved version
+# create_business.py - نسخة معدلة و محسنة
 
 import re
 import requests
@@ -12,42 +12,42 @@ from config import TEMPMAIL_BASE_URL, TEMPMAIL_HEADERS, MAX_CREATIONS_PER_COOKIE
 from database import Database
 
 def create_temp_email():
-    """Create a new temporary email address."""
+    """إنشاء بريد إلكتروني مؤقت جديد"""
     try:
         response = requests.post(f"{TEMPMAIL_BASE_URL}/addresses", headers=TEMPMAIL_HEADERS)
         response.raise_for_status()
         data = response.json()
         email = data["data"]["email"]
-        print(f"📧 Created temporary email: {email}")
+        print(f"📧 تم إنشاء بريد إلكتروني مؤقت: {email}")
         return email
     except requests.RequestException as e:
-        print(f"❌ Error creating email: {e}")
+        print(f"❌ خطأ في إنشاء البريد الإلكتروني: {e}")
         return None
 
 def get_emails(email_address):
-    """Retrieve emails for a temporary email address."""
+    """جلب الرسائل لبريد إلكتروني مؤقت"""
     try:
         response = requests.get(f"{TEMPMAIL_BASE_URL}/addresses/{email_address}/emails", headers=TEMPMAIL_HEADERS)
         response.raise_for_status()
         data = response.json()
         return data["data"]
     except requests.RequestException as e:
-        print(f"❌ Error fetching emails: {e}")
+        print(f"❌ خطأ في جلب الرسائل: {e}")
         return []
 
 def read_email(email_uuid):
-    """Read the content of a specific email."""
+    """قراءة محتوى رسالة محددة"""
     try:
         response = requests.get(f"{TEMPMAIL_BASE_URL}/emails/{email_uuid}", headers=TEMPMAIL_HEADERS)
         response.raise_for_status()
         data = response.json()
         return data["data"]
     except requests.RequestException as e:
-        print(f"❌ Error reading email: {e}")
+        print(f"❌ خطأ في قراءة الرسالة: {e}")
         return None
 
 def extract_invitation_link(email_body):
-    """Extract the invitation link from the email body."""
+    """استخراج رابط الدعوة من محتوى الرسالة"""
     pattern = r'https://business\.facebook\.com/invitation/\?token=[^"\s]+'
     match = re.search(pattern, email_body)
     if match:
@@ -55,8 +55,8 @@ def extract_invitation_link(email_body):
     return None
 
 def wait_for_invitation_email(email_address, timeout=300):
-    """Wait for the invitation email and extract the link."""
-    print(f"🔄 Waiting for invitation email at: {email_address}")
+    """انتظار وصول رسالة دعوة واستخراج الرابط"""
+    print(f"🔄 انتظار رسالة دعوة على: {email_address}")
     start_time = time.time()
     
     while time.time() - start_time < timeout:
@@ -64,19 +64,19 @@ def wait_for_invitation_email(email_address, timeout=300):
         if emails:
             for email_data in emails:
                 if "facebook" in email_data.get('from', '').lower() or "invitation" in email_data.get('subject', '').lower():
-                    print(f"📨 Found invitation email from: {email_data.get('from', 'N/A')}")
+                    print(f"📨 تم العثور على رسالة دعوة من: {email_data.get('from', 'N/A')}")
                     email_content = read_email(email_data['uuid'])
                     if email_content:
                         invitation_link = extract_invitation_link(email_content['body'])
                         if invitation_link:
-                            print(f"🔗 Invitation link extracted!")
+                            print(f"🔗 تم استخراج رابط الدعوة!")
                             return invitation_link
         time.sleep(10)
-    print("⏰ Timeout waiting for invitation email")
+    print("⏰ انتهى وقت الانتظار لرسالة الدعوة")
     return None
 
 def generate_random_name():
-    """Generate realistic random first and last names."""
+    """إنشاء أسماء عشوائية واقعية"""
     first_names = ['Ahmed', 'Mohamed', 'Omar', 'Ali', 'Hassan', 'Mahmoud', 'Youssef', 'Khaled', 'Amr', 'Tamer', 
                    'John', 'Michael', 'David', 'James', 'Robert', 'William', 'Richard', 'Charles', 'Joseph', 'Thomas']
     last_names = ['Hassan', 'Mohamed', 'Ali', 'Ibrahim', 'Mahmoud', 'Youssef', 'Ahmed', 'Omar', 'Said', 'Farid',
@@ -84,7 +84,7 @@ def generate_random_name():
     return random.choice(first_names), random.choice(last_names)
 
 def generate_business_name():
-    """Generate a random business name."""
+    """إنشاء اسم عمل عشوائي"""
     business_prefixes = ['Tech', 'Digital', 'Smart', 'Pro', 'Elite', 'Global', 'Prime', 'Alpha', 'Meta', 'Cyber', 'Next', 'Future']
     business_suffixes = ['Solutions', 'Systems', 'Services', 'Group', 'Corp', 'Ltd', 'Inc', 'Agency', 'Studio', 'Labs', 'Works', 'Hub']
     random_num = random.randint(100, 999)
@@ -97,13 +97,13 @@ def generate_business_name():
     return random.choice(name_formats)
 
 def generate_random_user_agent():
-    """Generate a random User-Agent string."""
+    """إنشاء User-Agent عشوائي"""
     chrome_versions = ['131.0.0.0', '130.0.0.0', '129.0.0.0', '128.0.0.0']
     version = random.choice(chrome_versions)
     return f'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{version} Safari/537.36'
 
 def extract_token_from_response(response):
-    """Extract the DTSGInitialData token from the HTML response."""
+    """استخراج رمز DTSGInitialData من الرد"""
     token_value = None
     pattern = re.compile(
         r'\["DTSGInitialData",\s*\[\],\s*\{\s*"token":\s*"([^"]+)"'
@@ -124,7 +124,7 @@ def extract_token_from_response(response):
     return token_value
 
 def parse_cookies(cookies_input):
-    """Convert a cookie string into a dictionary."""
+    """تحويل الكوكيز من نص إلى قاموس"""
     cookies = {}
     for part in cookies_input.split(';'):
         if '=' in part:
@@ -133,14 +133,14 @@ def parse_cookies(cookies_input):
     return cookies
 
 def get_user_id_from_cookies(cookies):
-    """Extract user ID from cookies."""
+    """استخراج user ID من الكوكيز"""
     return cookies.get('c_user', "61573547480828")
 
 def create_facebook_business_for_combo(cookies_input, db, combo_id, user_id):
     """
-    Create a new Facebook business using the provided cookies.
+    إنشاء عمل تجاري على فيسبوك باستخدام الكوكيز.
     """
-    print(f"\n🚀 Starting new business creation attempt for combo ID: {combo_id}")
+    print(f"\n🚀 بدء محاولة إنشاء عمل تجاري جديد للكومبو ID: {combo_id}")
 
     try:
         cookies = parse_cookies(cookies_input)
@@ -157,25 +157,25 @@ def create_facebook_business_for_combo(cookies_input, db, combo_id, user_id):
             'Sec-Fetch-User': '?1',
         }
         
-        # Step 1: Access Business Manager to get the token
-        print("1️⃣ Fetching tokens from Business Manager page...")
+        # الخطوة 1: الوصول إلى Business Manager للحصول على الرمز
+        print("1️⃣ جلب الرموز من صفحة Business Manager...")
         response = requests.get('https://business.facebook.com/overview/', headers=headers, cookies=cookies, stream=True, allow_redirects=True)
         token_value = extract_token_from_response(response)
         
         if not token_value:
-            print("❌ Failed to extract DTSG token. Cookies might be invalid.")
+            print("❌ فشل في استخراج رمز DTSG. قد تكون الكوكيز غير صالحة.")
             db.update_combo_status(combo_id, "invalid")
             return False, None, None
 
-        # Step 2: Send the mutation to create the business
-        print("2️⃣ Sending request to create the business...")
+        # الخطوة 2: إرسال Mutation لإنشاء العمل التجاري
+        print("2️⃣ إرسال طلب لإنشاء العمل التجاري...")
 
         business_name = generate_business_name()
         first_name, last_name = generate_random_name()
         admin_email = create_temp_email()
 
         if not admin_email:
-            print("❌ Failed to create a temporary email.")
+            print("❌ فشل في إنشاء بريد إلكتروني مؤقت.")
             return False, None, None
             
         payload = {
@@ -212,7 +212,7 @@ def create_facebook_business_for_combo(cookies_input, db, combo_id, user_id):
         
         if 'errors' in data:
             error_message = data['errors'][0]['message']
-            print(f"❌ Error creating business: {error_message}")
+            print(f"❌ خطأ في إنشاء العمل التجاري: {error_message}")
             if "limit reached" in error_message.lower():
                 db.update_combo_status(combo_id, "limit_reached")
                 return "LIMIT_REACHED", None, None
@@ -220,9 +220,9 @@ def create_facebook_business_for_combo(cookies_input, db, combo_id, user_id):
                 return False, None, None
         
         biz_id = data['data']['ads_business_account_create']['business']['id']
-        print(f"✅ Business created successfully! ID: {biz_id}")
+        print(f"✅ تم إنشاء العمل التجاري بنجاح! ID: {biz_id}")
 
-        # Step 3: Wait for and extract the invitation link
+        # الخطوة 3: انتظار رابط الدعوة و استخراجه
         invitation_link = wait_for_invitation_email(admin_email)
         
         if invitation_link:
@@ -234,16 +234,16 @@ def create_facebook_business_for_combo(cookies_input, db, combo_id, user_id):
             return False, biz_id, None
                 
     except requests.RequestException as e:
-        print(f"❌ HTTP request error: {e}")
+        print(f"❌ خطأ في طلب HTTP: {e}")
         db.update_combo_status(combo_id, "request_error")
         return False, None, None
     except Exception as e:
-        print(f"❌ Unexpected error: {e}")
+        print(f"❌ خطأ غير متوقع: {e}")
         db.update_combo_status(combo_id, "general_error")
         return False, None, None
 
 def process_combo(user_telegram_id):
-    """Main process to start creating businesses for available combos."""
+    """العملية الرئيسية للبدء في إنشاء الأعمال التجارية للكومبوهات المتاحة"""
     with Database() as db:
         user = db.get_user(user_telegram_id)
         if not user or not db.is_subscribed(user_telegram_id):
