@@ -1,5 +1,3 @@
-# config.py
-
 import os
 
 # Telegram Bot Token
@@ -8,19 +6,19 @@ BOT_TOKEN = os.getenv('BOT_TOKEN', '8264460763:AAGaGR7IaKeUUQqaw2QD1_3dpX3rAoVTh
 # Admin Telegram ID
 ADMIN_ID = 5607097913
 
-# Marketer Username
-MARKETER_USERNAME = '@Bangladesh3456'
+# Marketer Username (غيّر دا لو عايز يوزر مسوق مختلف)
+MARKETER_USERNAME = '@YourMarketerUsername'  # ضع يوزر المسوق الحقيقي هنا
 
-# Database Configuration for Postgres
-DB_HOST = os.getenv('DB_HOST', 'localhost')
-DB_PORT = os.getenv('DB_PORT', '5432')
-DB_NAME = os.getenv('DB_NAME', 'facebook_business_db')
-DB_USER = os.getenv('DB_USER', 'postgres')
-DB_PASSWORD = os.getenv('DB_PASSWORD', '')
+# Database Configuration for PostgreSQL (using Railway environment variables)
+DB_HOST = os.getenv('PGHOST', 'localhost')
+DB_PORT = os.getenv('PGPORT', '5432')
+DB_NAME = os.getenv('PGDATABASE', 'railway')
+DB_USER = os.getenv('PGUSER', 'postgres')
+DB_PASSWORD = os.getenv('PGPASSWORD', 'qlTkLeMzBjsFmOJKisdMpyNeFCZopdQm')
 
 # TempMail API Configuration
 TEMPMAIL_BASE_URL = "https://api.tempmail.co/v1"
-TEMPMAIL_API_TOKEN = "114|DuFjCcsMwMfzwIAFvQQwTkt3Y7e6TQNigieKt3tZ7fca91d4"
+TEMPMAIL_API_TOKEN = os.getenv('TEMPMAIL_API_TOKEN', '114|DuFjCcsMwMfzwIAFvQQwTkt3Y7e6TQNigieKt3tZ7fca91d4')
 TEMPMAIL_HEADERS = {"Authorization": f"Bearer {TEMPMAIL_API_TOKEN}"}
 
 # Subscription Prices (in some currency, e.g., USD)
